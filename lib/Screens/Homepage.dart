@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../Utils/Colours.dart';
 import '../Utils/Info.dart';
 import '../model/model.dart';
@@ -21,6 +21,7 @@ class _HomepageState extends State<Homepage> {
   ImagePicker imagePicker = ImagePicker();
   XFile? xFile;
   String? pickImagePath;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,68 +80,128 @@ class _HomepageState extends State<Homepage> {
                     top: Radius.circular(50),
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 20, top: 25, bottom: 20),
-                      child: Text(
-                        "All are here...",
-                        style: TextStyle(fontSize: 22),
-                      ),
-                    ),
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Color(0xff4894fe),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        width: MediaQuery.of(context).size.width / 1.1,
-                        height: 100,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                child: (Things.allStudent.isEmpty)
+                    ? Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(500),
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Image.asset(
+                                "assets/image/1.png",
+                                height: 60,
                               ),
                             ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Text(
-                                    "Student name",
-                                    style: TextStyle(
-                                        fontSize: 19, color: Colors.white),
-                                  ),
-                                ),
-                                Text(
-                                  "data",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ],
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).pushNamed('details');
-                              },
-                              child: Icon(
-                                Icons.arrow_forward_outlined,
-                                color: Colors.white,
-                              ),
+                            Text(
+                              "No Student Here !!!!!",
+                              style: TextStyle(fontSize: 22),
                             )
                           ],
                         ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding:
+                                EdgeInsets.only(left: 20, top: 25, bottom: 20),
+                            child: Text(
+                              "All are here...",
+                              style: TextStyle(fontSize: 22),
+                            ),
+                          ),
+                          Center(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  ...Things.allStudent.map(
+                                    (e) => Padding(
+                                      padding: EdgeInsets.only(bottom: 20),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xff4894fe),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                1.1,
+                                        height: 100,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            Container(
+                                              width: 75,
+                                              height: 75,
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: FileImage(
+                                                    File(pickImagePath!),
+                                                  ),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(200),
+                                              ),
+                                            ),
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          bottom: 8.0),
+                                                  child: Text(
+                                                    e.name,
+                                                    style: TextStyle(
+                                                        fontSize: 22,
+                                                        color: Colors.white),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  e.id,
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ],
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                Things.allStudent.remove(e);
+                                              },
+                                              child: Icon(
+                                                Icons
+                                                    .remove_circle_outline_sharp,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                Navigator.of(context).pushNamed(
+                                                  'details',
+                                                  arguments: e,
+                                                );
+                                              },
+                                              child: Icon(
+                                                Icons.arrow_forward_outlined,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
                       ),
-                    )
-                  ],
-                ),
               ),
             )
           ],
@@ -381,27 +442,18 @@ class _HomepageState extends State<Homepage> {
                                   onPressed: () {
                                     if (referenceKey.currentState!.validate()) {
                                       referenceKey.currentState!.save();
-
+                                      if (pickImagePath != null) {
+                                        Things.profileImageFile =
+                                            pickImagePath!;
+                                      }
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
                                           behavior: SnackBarBehavior.floating,
                                           backgroundColor:
                                               mainAppColour.withOpacity(0.5),
-                                          action: SnackBarAction(
-                                            label: "Next",
-                                            onPressed: () {
-                                              setState(() {
-                                                Navigator.of(context)
-                                                    .pushNamedAndRemoveUntil(
-                                                        "workspace",
-                                                        (route) => false);
-                                              });
-                                            },
-                                            textColor: white,
-                                          ),
                                           content: Text(
-                                            "Technical skills information Saved SuccessFully!!!",
+                                            "Input Successful",
                                           ),
                                         ),
                                       );
@@ -409,6 +461,7 @@ class _HomepageState extends State<Homepage> {
                                         id: Things.id,
                                         name: Things.name,
                                         std: Things.std,
+                                        pickImagePath: Things.profileImageFile,
                                       );
 
                                       Things.allStudent.add(data);
